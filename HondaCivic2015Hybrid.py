@@ -16,7 +16,7 @@ class HondaCivic:
     odomCMD = obd.OBDCommand(
         "ODOM", "ODOMETER DATA", b"01A6", 6, decode_odometer
     )
-    DEBUG = True
+    DEBUG = False
 
     def __init__(self):
         self.connection = None
