@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SQrL Car</title>
+    <script>
+        function makeJSONRequest(path, method, callback) {
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    callback(JSON.parse(this.response));
+                }
+            };
+            http.open(method, "http://localhost:8000/"+path, true);
+            http.send();
+        }
+    </script>
+</head>
+<body>
+
+    <div style="text-align: center">
+    <span id="Speed" style="font-size: 10rem; text-align: center"></span><span style="font-size: 4rem;">MPH</span></div>
+    <div style="font-size: 5rem; text-align: center">
+        Gas:<span id="Gas"></span>&nbsp;&nbsp;&nbsp;&nbsp;
+        Battery:<span id="Battery"></span>
+    </div>
+    <script>
+        setInterval(function() {
+            makeJSONRequest("data", "GET", function(data){
+            document.getElementById("Speed").innerHTML = data.speed;
+            document.getElementById("Gas").innerHTML = data.gas;
+            document.getElementById("Battery").innerHTML = data.battery;
+        });
+        }, 10)
+
+
+    </script>
+</body>
+</html>
