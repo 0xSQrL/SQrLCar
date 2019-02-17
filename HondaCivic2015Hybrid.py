@@ -3,20 +3,10 @@ import obd.utils
 import math
 
 
-def decode_odometer(messages):
-    d = messages[0].data
-    d = d[2:]
-    v = obd.utils.bytes_to_int(d)
-    return v * obd.Unit.miles
-
-
 class HondaCivic:
     GAS_TANK_GALLONS = 10.0
     MILES_PER_GALLON = 41.0
-    odomCMD = obd.OBDCommand(
-        "ODOM", "ODOMETER DATA", b"01A6", 6, decode_odometer
-    )
-    DEBUG = False
+    DEBUG = True
 
     def __init__(self):
         self.connection = None
@@ -28,23 +18,16 @@ class HondaCivic:
         if self.connection is not None and self.connection.is_connected() == obd.OBDStatus.NOT_CONNECTED:
             self.connection.close()
         self.connection = obd.OBD()
-        if self.connection.is_connected() == obd.OBDStatus.NOT_CONNECTED:
-            self.connection.supported_commands.add(HondaCivic.odomCMD)
 
     def get_speed_mph(self):
         if HondaCivic.DEBUG:
             return 10.5
         return math.floor(self.try_query(obd.commands.SPEED).value.to("mph").magnitude * 5) / 5
 
-    def get_odometer(self):
-        if HondaCivic.DEBUG:
-            return 12
-        return self.try_query(HondaCivic.odomCMD, force=True).value.magnitude
-
     def get_running_time(self):
         if HondaCivic.DEBUG:
             return 400
-        return self.try_query(obd.commands.RUN_TIME).value.to("mph").magnitude
+        return self.try_query(obd.commands.RUN_TIME).value.magnitude
 
     def get_battery(self):
         if HondaCivic.DEBUG:
