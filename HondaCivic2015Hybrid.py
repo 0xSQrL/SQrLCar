@@ -13,6 +13,7 @@ class HondaCivic:
 
     def __init__(self):
         self.connection = None
+        self.values = {}
         if HondaCivic.DEBUG:
             return
         self.retry_connection()
@@ -45,9 +46,15 @@ class HondaCivic:
     def get_gas_percent(self):
         if HondaCivic.DEBUG:
             return 0.72
-        return self.try_query(obd.commands.FUEL_LEVEL).value.magnitudenitude
+        return self.try_query(obd.commands.FUEL_LEVEL).value.magnitude
 
-    def get_fuel_comsumption(self):
+    def get_fuel_economy(self):
+        if HondaCivic.DEBUG:
+            return 0.72
+
+        return self.get_speed_mph() / self.get_fuel_consumption()
+
+    def get_fuel_consumption(self):
         if HondaCivic.DEBUG:
             return 0.72
 
@@ -67,8 +74,11 @@ class HondaCivic:
         try:
             ret = self.connection.query(command, force=force)
             if ret.value is not None:
+                self.values[command] = ret
                 return ret
         except:
             print('err')
         self.retry_connection()
+        if command in self.values:
+            return self.values[command]
         return -1 * obd.Unit.miles

@@ -24,7 +24,7 @@ class TestHandler(BaseHTTPRequestHandler):
                 "speed": Car.get_speed_mph(),
                 "battery": Car.get_battery(),
                 "image": file_loc,
-                "consumption": Car.get_fuel_comsumption(),
+                "consumption": Car.get_fuel_consumption(),
             }
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
