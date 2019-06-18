@@ -1,28 +1,30 @@
 from HondaCivic2015Hybrid import HondaCivic
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import cv2
+#import cv2
 import json
 import time
 import numpy
 
 Car = HondaCivic()
-video_device = cv2.VideoCapture(0)
-video_device.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-video_device.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+#video_device = cv2.VideoCapture(0)
+#video_device.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+#video_device.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
 
 class TestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         print(self.path)
         if self.path == "/data":
-            unused, image = video_device.read()
+            #unused, image = video_device.read()
             file_loc = "images/"+str(time.time())+".jpg"
-            cv2.imwrite(file_loc, image)
+            #cv2.imwrite(file_loc, image)
             car = {
                 "gas": Car.get_gas_percent(),
                 "speed": Car.get_speed_mph(),
                 "battery": Car.get_battery(),
                 "image": file_loc,
+                "consumption": Car.get_fuel_comsumption(),
             }
             self.send_response(200)
             self.send_header('Content-type', 'application/json')

@@ -22,7 +22,8 @@
     <span id="Speed" style="font-size: 10rem; text-align: center"></span><span style="font-size: 4rem;">MPH</span></div>
     <div style="font-size: 5rem; text-align: center">
         Gas:<span id="Gas"></span>&nbsp;&nbsp;&nbsp;&nbsp;
-        Battery:<span id="Battery"></span>
+        Battery:<span id="Battery"></span>&nbsp;&nbsp;&nbsp;&nbsp;
+        Consumption:<span id="Consumption"></span>
     </div>
     <script>
         setInterval(function() {
@@ -30,6 +31,7 @@
             document.getElementById("Speed").innerHTML = data.speed;
             document.getElementById("Gas").innerHTML = data.gas;
             document.getElementById("Battery").innerHTML = data.battery;
+            document.getElementById("Consumption").innerHTML = data.consumption;
         });
         }, 500)
 

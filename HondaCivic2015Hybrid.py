@@ -6,7 +6,10 @@ import math
 class HondaCivic:
     GAS_TANK_GALLONS = 10.0
     MILES_PER_GALLON = 41.0
-    DEBUG = True
+    DEBUG = False
+    GRAMS_AIR_TO_FUEL = 1./14.7
+    GRAMS_TO_GALLON_FUEL = 1 / (454 * 6.701)
+    MAF_CONVERSION = GRAMS_AIR_TO_FUEL * GRAMS_TO_GALLON_FUEL * 3600
 
     def __init__(self):
         self.connection = None
@@ -42,7 +45,13 @@ class HondaCivic:
     def get_gas_percent(self):
         if HondaCivic.DEBUG:
             return 0.72
-        return self.try_query(obd.commands.FUEL_LEVEL).value.magnitude
+        return self.try_query(obd.commands.FUEL_LEVEL).value.magnitudenitude
+
+    def get_fuel_comsumption(self):
+        if HondaCivic.DEBUG:
+            return 0.72
+
+        return self.try_query(obd.commands.MAF).value.magnitude * HondaCivic.MAF_CONVERSION
 
     def get_gas_gallons(self):
         if HondaCivic.DEBUG:
