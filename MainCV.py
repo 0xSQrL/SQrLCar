@@ -11,14 +11,14 @@ def convert_bw(frame):
 
 
 def put_text(frame, text, x, y):
-    cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 4, cv2.LINE_AA, False)
+    cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 6, cv2.LINE_AA, False)
     cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA, False)
 
 
 Car = CarConnection()
-
-left = CameraStream(src=1, width=640, height=480)
-right = CameraStream(src=0, width=640, height=480)
+Car.start()
+left = CameraStream(src=0, width=640, height=480)
+#right = CameraStream(src=0, width=640, height=480)
 left.frame_operation = convert_bw
 left.start()
 #right.start()
@@ -28,7 +28,7 @@ cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, True)
 
 while True:
     image = left.frame
-    image2 = right.frame
+    #image2 = right.frame
     put_text(image, str(Car.get_speed_mph()) + " mph", 100, 200)
     put_text(image, str(Car.get_battery()) + "%", 100, 240)
     put_text(image, str(Car.get_fuel_consumption()) + " gal/h", 100, 280)
@@ -39,4 +39,5 @@ while True:
         break
 
 left.release()
-right.release()
+#right.release()
+Car.dispose()
