@@ -1,14 +1,20 @@
-from HondaCivic2015Hybrid import HondaCivic
+from CarWrapper import CarConnection
 from http.server import HTTPServer, BaseHTTPRequestHandler
-#import cv2
+
+useCV = False
+if useCV:
+    import cv2
+    import numpy
+
 import json
 import time
-import numpy
 
-Car = HondaCivic()
-#video_device = cv2.VideoCapture(0)
-#video_device.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-#video_device.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+Car = CarConnection()
+
+if useCV:
+    video_device = cv2.VideoCapture(0)
+    video_device.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    video_device.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 
 class TestHandler(BaseHTTPRequestHandler):
@@ -16,9 +22,12 @@ class TestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print(self.path)
         if self.path == "/data":
-            #unused, image = video_device.read()
-            file_loc = "images/"+str(time.time())+".jpg"
-            #cv2.imwrite(file_loc, image)
+            file_loc = ""
+            if useCV:
+                unused, image = video_device.read()
+                file_loc = "images/"+str(time.time())+".jpg"
+                cv2.imwrite(file_loc, image)
+
             car = {
                 "gas": Car.get_gas_percent(),
                 "speed": Car.get_speed_mph(),
