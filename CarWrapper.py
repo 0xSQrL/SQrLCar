@@ -4,10 +4,10 @@ import math
 from threading import Thread
 from serial.serialutil import SerialException
 import time
+import numpy
 
 
 class Constants:
-    DEBUG = False
     GRAMS_AIR_TO_FUEL = 1./14.7
     GRAMS_TO_GALLON_FUEL = 1 / (454 * 6.701)
     MAF_CONVERSION = GRAMS_AIR_TO_FUEL * GRAMS_TO_GALLON_FUEL * 3600
@@ -28,8 +28,7 @@ class CarConnection:
             obd.commands.HYBRID_BATTERY_REMAINING,
             obd.commands.MAF
         ]
-        if Constants.DEBUG:
-            return
+        self.battery_history = []
         self.retry_connection()
 
     def start(self):
@@ -39,8 +38,19 @@ class CarConnection:
     def update(self):
         while not self.disposed:
             time.sleep(0.2)
+            last_battery = 0
             for metric in self.metrics:
+                if metric == obd.commands.HYBRID_BATTERY_REMAINING:
+                    last_battery = self.values[obd.commands.HYBRID_BATTERY_REMAINING].magnitude
+
                 self.try_query(metric)
+
+                if metric == obd.commands.HYBRID_BATTERY_REMAINING:
+                    battery_diff = self.values[obd.commands.HYBRID_BATTERY_REMAINING].magnitude - last_battery
+                    print(len(self.battery_history))
+                    self.battery_history.append(battery_diff)
+                    if len(self.battery_history) > 20:
+                        self.battery_history.pop(0)
 
 
     def retry_connection(self):
@@ -52,40 +62,31 @@ class CarConnection:
             print("No OBD device found")
 
     def get_speed_mph(self):
-        if Constants.DEBUG:
-            return 10.5
         return math.floor(self.values[obd.commands.SPEED].to("mph").magnitude * 5) / 5
 
     def get_running_time(self):
-        if Constants.DEBUG:
-            return 400
         return self.values[obd.commands.RUN_TIME].magnitude
 
     def get_battery(self):
-        if Constants.DEBUG:
-            return 0.69
         return self.values[obd.commands.HYBRID_BATTERY_REMAINING].magnitude
 
+    def get_battery_change(self):
+        return numpy.average(self.battery_history)
+
     def get_pressure(self):
-        if Constants.DEBUG:
-            return 98
         return self.values[obd.commands.BAROMETRIC_PRESSURE].magnitude
 
     def get_gas_percent(self):
-        if Constants.DEBUG:
-            return 0.72
         return self.values[obd.commands.FUEL_LEVEL].magnitude
 
     def get_fuel_economy(self):
-        if Constants.DEBUG:
-            return 0.72
-
-        return self.get_speed_mph() / self.get_fuel_consumption()
+        speed = self.get_speed_mph()
+        consumption = self.get_fuel_consumption()
+        if consumption == 0:
+            return 0
+        return speed / consumption
 
     def get_fuel_consumption(self):
-        if Constants.DEBUG:
-            return 0.72
-
         return self.values[obd.commands.MAF].magnitude * Constants.MAF_CONVERSION
 
     def try_query(self, command, force=True):
