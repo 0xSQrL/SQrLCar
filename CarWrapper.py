@@ -93,7 +93,7 @@ class CarConnection:
         try:
             ret = self.connection.query(command, force=force)
             if ret.value is not None:
-                self.values[command] = ret
+                self.values[command] = ret.value
                 return ret
         except:
             print('err')
