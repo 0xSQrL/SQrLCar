@@ -20,7 +20,7 @@ class CarConnection:
         self.disposed = False
         self.values = {
             obd.commands.SPEED: 15 * obd.Unit.mph,
-            obd.commands.HYBRID_BATTERY_REMAINING: 50 * obd.Unit.percent,
+            obd.commands.HYBRID_BATTERY_REMAINING: 5.1234 * obd.Unit.percent,
             obd.commands.MAF: 10 * obd.Unit.gps
         }
         self.metrics = [
@@ -28,6 +28,8 @@ class CarConnection:
             obd.commands.HYBRID_BATTERY_REMAINING,
             obd.commands.MAF
         ]
+        self.gas_used = 0
+        self.last_gas_query = time.time()
         self.battery_history = []
         self.retry_connection()
 
@@ -43,7 +45,13 @@ class CarConnection:
                 if metric == obd.commands.HYBRID_BATTERY_REMAINING:
                     last_battery = self.values[obd.commands.HYBRID_BATTERY_REMAINING].magnitude
 
-                self.try_query(metric)
+                success = self.try_query(metric)
+
+                if success and metric == obd.commands.MAF:
+                    tmp_time = time.time()
+                    time_dif = tmp_time - self.last_gas_query
+                    self.gas_used += self.values[obd.commands.MAF].magnitude * time_dif
+                    self.last_gas_query = tmp_time
 
                 if metric == obd.commands.HYBRID_BATTERY_REMAINING:
                     battery_diff = self.values[obd.commands.HYBRID_BATTERY_REMAINING].magnitude - last_battery
@@ -51,7 +59,6 @@ class CarConnection:
                     self.battery_history.append(battery_diff)
                     if len(self.battery_history) > 20:
                         self.battery_history.pop(0)
-
 
     def retry_connection(self):
         if self.connection is not None and self.connection.is_connected() == obd.OBDStatus.NOT_CONNECTED:
@@ -89,18 +96,20 @@ class CarConnection:
     def get_fuel_consumption(self):
         return self.values[obd.commands.MAF].magnitude * Constants.MAF_CONVERSION
 
+    def get_fuel_consumed(self):
+        return self.gas_used * Constants.GRAMS_AIR_TO_FUEL * Constants.GRAMS_TO_GALLON_FUEL
+
     def try_query(self, command, force=True):
         try:
             ret = self.connection.query(command, force=force)
             if ret.value is not None:
                 self.values[command] = ret.value
-                return ret
-        except:
-            print('err')
+                return True
+        except AttributeError:
+            print('Failed to query {}'.format(command))
+
         self.retry_connection()
-        if command in self.values:
-            return self.values[command]
-        return -1 * obd.Unit.miles
+        return False
 
     def dispose(self):
         self.disposed = True
