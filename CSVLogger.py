@@ -14,3 +14,6 @@ class CSVLogger:
         for header in data:
             self.file.write("{},".format(header))
         self.file.write('\n')
+
+    def dispose(self):
+        self.file.close()

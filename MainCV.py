@@ -89,3 +89,4 @@ while True:
 left.release()
 #right.release()
 Car.dispose()
+logger.dispose()
