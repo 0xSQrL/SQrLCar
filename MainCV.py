@@ -34,8 +34,14 @@ def put_diagnostics(image, car, x, y):
     offset += 2
     put_text(image, time.strftime("%m/%d/%y %H:%M:%S"), x, y + offset * spacing)
 
-def save_image(image, file_name):
-    cv2.imwrite(file_name, image)
+
+def save_image(image, throwaway):
+    cur_time = time.time()
+    file_loc = "images/{}-{}.jpg".format(
+        time.strftime("%y-%m-%d %H-%M-%S"),
+        str(cur_time - int(cur_time))[2:4])
+    cv2.imwrite(file_loc, image)
+
 
 if not os.path.exists("logs"):
     os.mkdir("logs")
@@ -67,11 +73,7 @@ while True:
     put_diagnostics(image, Car, 10, 220)
     count -= 1
     if count <= 0:
-        cur_time = time.time()
-        file_loc = "images/{}-{}.jpg".format(
-                time.strftime("%y-%m-%d %H-%M-%S"),
-                str(cur_time - int(cur_time))[2:4])
-        Thread(target=save_image, args=(image, file_loc)).start()
+        Thread(target=save_image, args=(image, None)).start()
         count = 5
     logger.log_data([
             time.time(),
