@@ -6,6 +6,7 @@ from CameraStream import CameraStream
 from CSVLogger import CSVLogger
 import time
 import os
+from threading import Thread
 
 
 def convert_bw(frame):
@@ -33,6 +34,8 @@ def put_diagnostics(image, car, x, y):
     offset += 2
     put_text(image, time.strftime("%m/%d/%y %H:%M:%S"), x, y + offset * spacing)
 
+def save_image(image, file_name):
+    cv2.imwrite(file_name, image)
 
 if not os.path.exists("logs"):
     os.mkdir("logs")
@@ -68,7 +71,7 @@ while True:
         file_loc = "images/{}-{}.jpg".format(
                 time.strftime("%y-%m-%d %H-%M-%S"),
                 str(cur_time - int(cur_time))[2:4])
-        cv2.imwrite(file_loc, image)
+        Thread(target=save_image, args=(image, file_loc)).start()
         count = 5
     logger.log_data([
             time.time(),
